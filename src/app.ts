@@ -1,9 +1,9 @@
 import express from 'express';
 // import helmet from 'helmet';
 import cors from 'cors';
-import { rootRouter } from './routes/index.js';
-import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import { rootRouter } from './routes/index';
+import { notFoundHandler } from './middlewares/notFoundHandler';
+import { errorHandler } from './middlewares/errorHandler';
 
 export const createApp = () => {
   const app = express();
