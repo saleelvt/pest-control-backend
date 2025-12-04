@@ -1,17 +1,11 @@
-import { Router } from 'express';
-import { apiV1Router } from './v1/index';
+import { Router } from "express";
+import authRoutes from "./auth.routes";
+import { contractRouter } from "./contract.routes";
 
 const router = Router();
 
-router.get('/health', (_req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      status: 'ok'
-    }
-  });
-});
+router.use("/auth", authRoutes);
 
-router.use('/api/v1', apiV1Router);
+router.use("/contracts", contractRouter);
 
 export { router as rootRouter };
