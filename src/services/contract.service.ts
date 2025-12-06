@@ -83,4 +83,67 @@ export class ContractService {
     await contract.save();
     return contract;
   }
+
+  async getJobById(contractId: string, jobId: string) {
+    const contract = await Contract.findById(contractId);
+    console.log("contract jobs:", contract);
+    if (!contract) {
+      throw new AppError({ message: "Contract not found", statusCode: 404 });
+    }
+
+    const job = await contract.jobs.find(
+      (j: JobType) => j._id?.toString() === jobId.toString()
+    );
+    console.log("jobs:", job);
+
+    if (!job) {
+      throw new AppError({ message: "Job not found", statusCode: 404 });
+    }
+
+    return job;
+  }
+
+  async updateJob(contractId: string, jobId: string, updates: any) {
+    const flatUpdates: any = {};
+    for (const [key, val] of Object.entries(updates)) {
+      if (key === "invoiceReminder" || key === "servicesProducts") {
+        flatUpdates[`jobs.$.${key}`] = val;
+      } else {
+        flatUpdates[`jobs.$.${key}`] = val;
+      }
+    }
+
+    const result = await Contract.findOneAndUpdate(
+      { _id: contractId, "jobs._id": jobId },
+      { $set: flatUpdates },
+      { new: true, runValidators: true }
+    );
+
+    if (!result)
+      throw new AppError({
+        message: "Job or contract not found",
+        statusCode: 404,
+      });
+
+    const updatedJob = result.jobs.find(
+      (j: any) => j._id.toString() === jobId.toString()
+    );
+    return updatedJob;
+  }
+
+  async deleteJob(contractId: string, jobId: string) {
+    const result = await Contract.findByIdAndUpdate(
+      contractId,
+      { $pull: { jobs: { _id: jobId } } },
+      { new: true }
+    );
+
+    if (!result)
+      throw new AppError({
+        message: "Contract not found or job not removed",
+        statusCode: 404,
+      });
+
+    return { success: true };
+  }
 }

@@ -14,6 +14,9 @@ import {
   updateContract,
   deleteContract,
   addJobToContract,
+  getJobById,
+  updateJob,
+  deleteJob,
 } from "../controllers/contract.controller";
 import { asyncHandler } from "../utils/asyncHandler";
 import { protectRoute } from "../middlewares/auth";
@@ -56,5 +59,10 @@ router.delete(
 );
 
 router.post("/:id/jobs", protectRoute, asyncHandler(addJobToContract));
+
+router.get("/:id/jobs/:jobId", protectRoute, asyncHandler(getJobById));
+
+router.patch("/:id/jobs/:jobId", protectRoute, asyncHandler(updateJob));
+router.delete("/:id/jobs/:jobId", protectRoute, asyncHandler(deleteJob));
 
 export { router as contractRouter };

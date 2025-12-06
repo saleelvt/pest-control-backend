@@ -46,3 +46,24 @@ export const addJobToContract = async (req: Request, res: Response) => {
     data: contract,
   });
 };
+
+export const getJobById = async (req: Request, res: Response) => {
+  const jobs = await service.getJobById(req.params.id!, req.params.jobId!);
+  return res.status(200).json({
+    success: true,
+    data: jobs,
+  });
+};
+
+export const updateJob = async (req: Request, res: Response) => {
+  const { id, jobId } = req.params;
+  const updates = req.body;
+  const updatedJob = await service.updateJob(id!, jobId!, updates!);
+  res.json({ success: true, data: updatedJob });
+};
+
+export const deleteJob = async (req: Request, res: Response) => {
+  const { id, jobId } = req.params;
+  await service.deleteJob(id!, jobId!);
+  res.status(204).send();
+};

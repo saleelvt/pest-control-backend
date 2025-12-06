@@ -10,7 +10,11 @@ export interface Address {
 }
 
 export interface ServiceProduct {
-  serviceType: "building_cleaning" | "tanks_containers_cleaning" | "disinfection_sterilization" | "pest_control";
+  serviceType:
+    | "building_cleaning"
+    | "tanks_containers_cleaning"
+    | "disinfection_sterilization"
+    | "pest_control";
   instructions: string;
   units: number;
   rate: number;
@@ -28,6 +32,7 @@ export interface InvoiceReminder {
 }
 
 export interface JobType {
+  _id?: string;
   jobType: "recurring" | "one_off";
   contractDate: Date;
   startDate: Date;
@@ -35,19 +40,20 @@ export interface JobType {
   contractedBy: string; // Employee ID or name
   expiryRemindBefore: number; // Days before expiry
   isTaxExempt: boolean;
-  
+
   invoiceReminder: InvoiceReminder;
   servicesProducts: ServiceProduct[];
-  
+
   subtotal: number;
   vat: number; // 5% of subtotal
   grandTotal: number;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface ContractDocument extends Document {
+  contractNumber: string;
   title: string;
   aliasName: string;
   trnNumber: string;
@@ -61,7 +67,7 @@ export interface ContractDocument extends Document {
   creditLimit: number;
 
   remarks: string;
-  
+
   jobs: JobType[]; // Array of jobs associated with this contract
 
   createdAt: Date;
@@ -84,7 +90,12 @@ const serviceProductSchema = new Schema<ServiceProduct>(
   {
     serviceType: {
       type: String,
-      enum: ["building_cleaning", "tanks_containers_cleaning", "disinfection_sterilization", "pest_control"],
+      enum: [
+        "building_cleaning",
+        "tanks_containers_cleaning",
+        "disinfection_sterilization",
+        "pest_control",
+      ],
       required: true,
     },
     instructions: { type: String, default: "" },
@@ -125,20 +136,25 @@ const jobSchema = new Schema<JobType>(
     contractedBy: { type: String, required: true },
     expiryRemindBefore: { type: Number, required: true, min: 0 },
     isTaxExempt: { type: Boolean, default: false },
-    
+
     invoiceReminder: { type: invoiceReminderSchema, required: true },
     servicesProducts: { type: [serviceProductSchema], required: true },
-    
+
     subtotal: { type: Number, required: true, min: 0 },
     vat: { type: Number, required: true, min: 0 },
     grandTotal: { type: Number, required: true, min: 0 },
-    
   },
   { timestamps: true }
 );
 
 const contractSchema = new Schema<ContractDocument>(
   {
+    contractNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      immutable: true,
+    },
     title: { type: String, required: true },
     aliasName: { type: String, required: true },
     trnNumber: { type: String, required: true },
@@ -153,13 +169,27 @@ const contractSchema = new Schema<ContractDocument>(
     creditLimit: { type: Number, required: true },
 
     remarks: { type: String, required: true },
-    
+
     jobs: { type: [jobSchema], default: [] },
   },
   {
     timestamps: true,
   }
 );
+
+contractSchema.pre("validate", async function (this: ContractDocument) {
+  if (this.contractNumber) return;
+
+  const lastContract = await Contract.findOne().sort({ createdAt: -1 });
+
+  let nextNumber = 1;
+  if (lastContract?.contractNumber) {
+    const lastNum = parseInt(lastContract.contractNumber.replace("PST", ""));
+    nextNumber = lastNum + 1;
+  }
+
+  this.contractNumber = "PST" + nextNumber.toString().padStart(3, "0");
+});
 
 export const Contract: Model<ContractDocument> =
   mongoose.models.Contract ||
