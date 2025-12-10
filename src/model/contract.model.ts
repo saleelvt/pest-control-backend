@@ -11,15 +11,16 @@ export interface Address {
 
 export interface ServiceProduct {
   serviceType:
-    | "building_cleaning"
-    | "tanks_containers_cleaning"
-    | "disinfection_sterilization"
-    | "pest_control";
+  | "building_cleaning"
+  | "tanks_containers_cleaning"
+  | "disinfection_sterilization"
+  | "pest_control";
   instructions: string;
   units: number;
   rate: number;
   subtotalPerYear: number;
   frequencyDays: number;
+  frequencyUnit: "day" | "week" | "month" | "year";
   isEveryDay: boolean;
 }
 
@@ -47,7 +48,8 @@ export interface JobType {
   subtotal: number;
   vat: number; // 5% of subtotal
   grandTotal: number;
-  status: "pending" | "completed" | "cancelled";
+  status: "work pending" | "work done" | "work informed";
+  dayType: "day" | "night";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -103,6 +105,11 @@ const serviceProductSchema = new Schema<ServiceProduct>(
     rate: { type: Number, required: true, min: 0 },
     subtotalPerYear: { type: Number, required: true, min: 0 },
     frequencyDays: { type: Number, required: true, min: 1 },
+    frequencyUnit: {
+      type: String,
+      enum: ["day", "week", "month", "year"],
+      required: true,
+    },
     isEveryDay: { type: Boolean, default: false },
   },
   { _id: false }
@@ -139,7 +146,8 @@ const jobSchema = new Schema<JobType>(
 
     invoiceReminder: { type: invoiceReminderSchema, required: true },
     servicesProducts: { type: [serviceProductSchema], required: true },
-    status: {type: String, enum: ["pending", "completed", "cancelled"], default: "pending" },
+    status: { type: String, enum: ["work pending", "work done", "work informed"], default: "work pending" },
+    dayType: { type: String, enum: ["day", "night"], required: true },
     subtotal: { type: Number, required: true, min: 0 },
     vat: { type: Number, required: true, min: 0 },
     grandTotal: { type: Number, required: true, min: 0 },
