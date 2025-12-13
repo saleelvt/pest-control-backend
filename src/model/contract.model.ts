@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface Address {
   street1: string;
@@ -70,7 +70,7 @@ export interface ContractDocument extends Document {
 
   remarks: string;
 
-  jobs: JobType[]; // Array of jobs associated with this contract
+  jobs: Types.DocumentArray<JobType>; // Array of jobs associated with this contract
 
   createdAt: Date;
   updatedAt: Date;
@@ -182,6 +182,8 @@ const contractSchema = new Schema<ContractDocument>(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 

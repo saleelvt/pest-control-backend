@@ -78,7 +78,19 @@ export class ContractService {
       throw new AppError({ message: "Contract not found", statusCode: 404 });
     }
 
-    contract.jobs.push(jobData);
+
+    contract.jobs.forEach((job: any) => {
+      if (!job.dayType) job.dayType = "day";
+      if (job.status === "pending") job.status = "work pending";
+      if (job.servicesProducts) {
+        job.servicesProducts.forEach((sp: any) => {
+          if (!sp.frequencyUnit) sp.frequencyUnit = "month";
+        });
+      }
+    });
+
+    const newJob = contract.jobs.create(jobData);
+    contract.jobs.push(newJob);
 
     await contract.save();
     return contract;
