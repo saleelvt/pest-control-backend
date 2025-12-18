@@ -17,6 +17,7 @@ import {
   getJobById,
   updateJob,
   deleteJob,
+  getDashboardStats,
 } from "../controllers/contract.controller";
 import { asyncHandler } from "../utils/asyncHandler";
 import { protectRoute } from "../middlewares/auth";
@@ -35,6 +36,12 @@ router.get(
   protectRoute,
   // validateRequest(listContractsSchema),
   asyncHandler(listContracts)
+);
+
+router.get(
+  "/stats",
+  protectRoute,
+  asyncHandler(getDashboardStats)
 );
 
 router.get(

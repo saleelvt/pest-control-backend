@@ -19,6 +19,11 @@ export const listContracts = async (req: Request, res: Response) => {
   res.json({ success: true, ...result });
 };
 
+export const getDashboardStats = async (req: Request, res: Response) => {
+  const stats = await service.getDashboardStats();
+  res.json({ success: true, data: stats });
+};
+
 export const getContractById = async (req: Request, res: Response) => {
   const data = await service.getById(req.params.id!);
   res.json({ success: true, data });

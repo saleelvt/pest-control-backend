@@ -158,4 +158,85 @@ export class ContractService {
 
     return { success: true };
   }
+
+  async getDashboardStats() {
+    const today = new Date();
+    const next30Days = new Date();
+    next30Days.setDate(today.getDate() + 30);
+
+    const contracts = await Contract.find().lean();
+
+    const expiredContracts: any[] = [];
+    const expiringContracts: any[] = [];
+    const overdueSchedules: any[] = [];
+    let scheduledThisWeek = 0;
+    let totalActiveContracts = 0;
+
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    for (const contract of contracts) {
+      if (!contract.jobs || contract.jobs.length === 0) continue;
+
+      const jobs = contract.jobs as JobType[];
+      const latestEndDate = new Date(
+        Math.max(...jobs.map((j) => new Date(j.endDate).getTime()))
+      );
+
+      if (latestEndDate < today) {
+        expiredContracts.push({
+          id: contract.contractNumber,
+          client: contract.title,
+          expiry: latestEndDate.toISOString().split("T")[0],
+          status: "expired",
+        });
+      } else {
+        totalActiveContracts++;
+        if (latestEndDate <= next30Days) {
+          expiringContracts.push({
+            id: contract.contractNumber,
+            client: contract.title,
+            expiry: latestEndDate.toISOString().split("T")[0],
+            status: "expiring",
+          });
+        }
+      }
+
+      for (const job of jobs) {
+        const jobDate = new Date(job.startDate);
+
+        if (jobDate >= startOfWeek && jobDate <= endOfWeek) {
+          scheduledThisWeek++;
+        }
+
+        if (job.status === "work pending" && jobDate < today) {
+          const diffTime = Math.abs(today.getTime() - jobDate.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          overdueSchedules.push({
+            id: job._id,
+            client: contract.title,
+            service: job.servicesProducts?.[0]?.serviceType || "Service",
+            dueDate: jobDate.toISOString().split("T")[0],
+            daysOverdue: diffDays,
+          });
+        }
+      }
+    }
+
+    return {
+      expiredContracts,
+      expiringContracts,
+      overdueSchedules,
+      stats: {
+        totalActiveContracts,
+        scheduledThisWeek,
+        actionRequired: expiredContracts.length + overdueSchedules.length,
+      },
+    };
+  }
 }
