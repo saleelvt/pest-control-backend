@@ -14,6 +14,8 @@ export const listContracts = async (req: Request, res: Response) => {
     page: Number(page),
     limit: Number(limit),
     search: search as string,
+    startDate: req.query.startDate as string,
+    endDate: req.query.endDate as string,
   });
 
   res.json({ success: true, ...result });

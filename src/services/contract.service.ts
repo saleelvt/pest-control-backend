@@ -6,7 +6,7 @@ export class ContractService {
     return await Contract.create(data);
   }
 
-  async list({ page = 1, limit = 10, search = "" }) {
+  async list({ page = 1, limit = 10, search = "", startDate = null, endDate = null }: any) {
     const filter: any = {};
 
     if (search) {
@@ -14,7 +14,17 @@ export class ContractService {
         { title: { $regex: search, $options: "i" } },
         { aliasName: { $regex: search, $options: "i" } },
         { trnNumber: { $regex: search, $options: "i" } },
+        { contractNumber: { $regex: search, $options: "i" } },
       ];
+    }
+
+    if (startDate && endDate) {
+      filter["jobs"] = {
+        $elemMatch: {
+          startDate: { $lte: new Date(endDate) },
+          endDate: { $gte: new Date(startDate) },
+        },
+      };
     }
 
     const skip = (page - 1) * limit;

@@ -78,12 +78,12 @@ export interface ContractDocument extends Document {
 
 const addressSchema = new Schema<Address>(
   {
-    street1: { type: String, required: true },
-    street2: { type: String, required: true },
-    city: { type: String, required: true },
-    poBox: { type: String, required: true },
-    emirate: { type: String, required: true },
-    country: { type: String, required: true },
+    street1: { type: String },
+    street2: { type: String },
+    city: { type: String },
+    poBox: { type: String },
+    emirate: { type: String },
+    country: { type: String },
   },
   { _id: false }
 );
@@ -97,18 +97,16 @@ const serviceProductSchema = new Schema<ServiceProduct>(
         "tanks_containers_cleaning",
         "disinfection_sterilization",
         "pest_control",
-      ],
-      required: true,
+      ]
     },
     instructions: { type: String, default: "" },
-    units: { type: Number, required: true, min: 0 },
-    rate: { type: Number, required: true, min: 0 },
-    subtotalPerYear: { type: Number, required: true, min: 0 },
-    frequencyDays: { type: Number, required: true, min: 1 },
+    units: { type: Number, min: 0 },
+    rate: { type: Number, min: 0 },
+    subtotalPerYear: { type: Number, min: 0 },
+    frequencyDays: { type: Number, min: 1 },
     frequencyUnit: {
       type: String,
       enum: ["day", "week", "month", "year"],
-      required: true,
     },
     isEveryDay: { type: Boolean, default: false },
   },
@@ -117,14 +115,13 @@ const serviceProductSchema = new Schema<ServiceProduct>(
 
 const invoiceReminderSchema = new Schema<InvoiceReminder>(
   {
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
+    startDate: { type: Date },
+    endDate: { type: Date },
     isAdvanceInvoice: { type: Boolean, default: false },
     invoiceAfterJobsClosed: { type: Boolean, default: false },
     billingFrequency: {
       type: String,
       enum: ["monthly", "quarterly", "semi_annually", "annually"],
-      required: true,
     },
   },
   { _id: false }
@@ -135,22 +132,21 @@ const jobSchema = new Schema<JobType>(
     jobType: {
       type: String,
       enum: ["recurring", "one_off"],
-      required: true,
     },
-    contractDate: { type: Date, required: true },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-    contractedBy: { type: String, required: true },
-    expiryRemindBefore: { type: Number, required: true, min: 0 },
+    contractDate: { type: Date },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    contractedBy: { type: String },
+    expiryRemindBefore: { type: Number, min: 0 },
     isTaxExempt: { type: Boolean, default: false },
 
-    invoiceReminder: { type: invoiceReminderSchema, required: true },
-    servicesProducts: { type: [serviceProductSchema], required: true },
+    invoiceReminder: { type: invoiceReminderSchema },
+    servicesProducts: { type: [serviceProductSchema] },
     status: { type: String, enum: ["work pending", "work done", "work informed"], default: "work pending" },
-    dayType: { type: String, enum: ["day", "night"], required: true },
-    subtotal: { type: Number, required: true, min: 0 },
-    vat: { type: Number, required: true, min: 0 },
-    grandTotal: { type: Number, required: true, min: 0 },
+    dayType: { type: String, enum: ["day", "night"] },
+    subtotal: { type: Number, min: 0 },
+    vat: { type: Number, min: 0 },
+    grandTotal: { type: Number, min: 0 },
   },
   { timestamps: true }
 );
@@ -159,24 +155,23 @@ const contractSchema = new Schema<ContractDocument>(
   {
     contractNumber: {
       type: String,
-      required: true,
       unique: true,
       immutable: true,
     },
-    title: { type: String, required: true },
-    aliasName: { type: String, required: true },
-    trnNumber: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    mobile: { type: String, required: true },
+    title: { type: String },
+    aliasName: { type: String },
+    trnNumber: { type: String },
+    email: { type: String },
+    phone: { type: String },
+    mobile: { type: String },
 
-    address: { type: addressSchema, required: true },
+    address: { type: addressSchema },
 
-    referredByEmployee: { type: String, required: true },
-    quoteValidityDays: { type: Number, required: true },
-    creditLimit: { type: Number, required: true },
+    referredByEmployee: { type: String },
+    quoteValidityDays: { type: Number },
+    creditLimit: { type: Number },
 
-    remarks: { type: String, required: true },
+    remarks: { type: String },
 
     jobs: { type: [jobSchema], default: [] },
   },
