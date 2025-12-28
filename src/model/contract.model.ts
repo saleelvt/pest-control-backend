@@ -21,15 +21,15 @@ export interface ServiceProduct {
   subtotalPerYear: number;
   frequencyDays: number;
   frequencyUnit: "day" | "week" | "month" | "year";
-  isEveryDay: boolean;
+  isEvery: boolean;
 }
 
 export interface InvoiceReminder {
   startDate: Date;
   endDate: Date;
-  isAdvanceInvoice: boolean;
-  invoiceAfterJobsClosed: boolean;
-  billingFrequency: "monthly" | "quarterly" | "semi_annually" | "annually";
+  billingFrequency: "monthly" | "quarterly" | "semi_annually" | "annually" | "custom";
+  customFrequencyValue?: number;
+  customFrequencyUnit?: "day" | "week" | "month" | "year";
 }
 
 export interface JobType {
@@ -108,7 +108,7 @@ const serviceProductSchema = new Schema<ServiceProduct>(
       type: String,
       enum: ["day", "week", "month", "year"],
     },
-    isEveryDay: { type: Boolean, default: false },
+    isEvery: { type: Boolean, default: false },
   },
   { _id: false }
 );
@@ -117,11 +117,14 @@ const invoiceReminderSchema = new Schema<InvoiceReminder>(
   {
     startDate: { type: Date },
     endDate: { type: Date },
-    isAdvanceInvoice: { type: Boolean, default: false },
-    invoiceAfterJobsClosed: { type: Boolean, default: false },
     billingFrequency: {
       type: String,
-      enum: ["monthly", "quarterly", "semi_annually", "annually"],
+      enum: ["monthly", "quarterly", "semi_annually", "annually", "custom"],
+    },
+    customFrequencyValue: { type: Number },
+    customFrequencyUnit: {
+      type: String,
+      enum: ["day", "week", "month", "year"],
     },
   },
   { _id: false }
