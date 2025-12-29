@@ -32,6 +32,13 @@ export interface InvoiceReminder {
   customFrequencyUnit?: "day" | "week" | "month" | "year";
 }
 
+export interface VisitRecord {
+  visitDate: Date;
+  status: "work pending" | "work done" | "work informed";
+  completedAt?: Date;
+  notes?: string;
+}
+
 export interface JobType {
   _id?: string;
   jobType: "recurring" | "one_off";
@@ -44,6 +51,7 @@ export interface JobType {
 
   invoiceReminder: InvoiceReminder;
   servicesProducts: ServiceProduct[];
+  visitRecords?: VisitRecord[];
 
   subtotal: number;
   vat: number; // 5% of subtotal
@@ -130,6 +138,20 @@ const invoiceReminderSchema = new Schema<InvoiceReminder>(
   { _id: false }
 );
 
+const visitRecordSchema = new Schema<VisitRecord>(
+  {
+    visitDate: { type: Date, required: true },
+    status: {
+      type: String,
+      enum: ["work pending", "work done", "work informed"],
+      default: "work pending",
+    },
+    completedAt: { type: Date },
+    notes: { type: String },
+  },
+  { _id: false }
+);
+
 const jobSchema = new Schema<JobType>(
   {
     jobType: {
@@ -145,6 +167,7 @@ const jobSchema = new Schema<JobType>(
 
     invoiceReminder: { type: invoiceReminderSchema },
     servicesProducts: { type: [serviceProductSchema] },
+    visitRecords: { type: [visitRecordSchema], default: [] },
     status: { type: String, enum: ["work pending", "work done", "work informed"], default: "work pending" },
     dayType: { type: String, enum: ["day", "night"] },
     subtotal: { type: Number, min: 0 },
