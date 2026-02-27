@@ -20,8 +20,10 @@ export interface ServiceProduct {
   rate: number;
   subtotalPerYear: number;
   frequencyDays: number;
-  frequencyUnit: "day" | "week" | "month" | "year";
+  frequencyUnit: "day" | "week" | "month" | "year" | "custom";
   isEvery: boolean;
+  customFrequencyValue?: number;
+  customFrequencyUnit?: "day" | "week" | "month" | "year";
 }
 
 export interface InvoiceReminder {
@@ -48,6 +50,7 @@ export interface JobType {
   contractedBy: string; // Employee ID or name
   expiryRemindBefore: number; // Days before expiry
   isTaxExempt: boolean;
+  remarks?: string; // Per-job remarks/notes
 
   invoiceReminder: InvoiceReminder;
   servicesProducts: ServiceProduct[];
@@ -114,9 +117,14 @@ const serviceProductSchema = new Schema<ServiceProduct>(
     frequencyDays: { type: Number, min: 1 },
     frequencyUnit: {
       type: String,
-      enum: ["day", "week", "month", "year"],
+      enum: ["day", "week", "month", "year", "custom"],
     },
     isEvery: { type: Boolean, default: false },
+    customFrequencyValue: { type: Number },
+    customFrequencyUnit: {
+      type: String,
+      enum: ["day", "week", "month", "year"],
+    },
   },
   { _id: false }
 );
@@ -164,6 +172,7 @@ const jobSchema = new Schema<JobType>(
     contractedBy: { type: String },
     expiryRemindBefore: { type: Number, min: 0 },
     isTaxExempt: { type: Boolean, default: false },
+    remarks: { type: String, default: "" },
 
     invoiceReminder: { type: invoiceReminderSchema },
     servicesProducts: { type: [serviceProductSchema] },
