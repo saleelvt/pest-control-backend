@@ -12,7 +12,7 @@ const server = http.createServer(app);
   await connectDB();
   server.listen(config.port, () => {
     logger.info(
-      `Server listening on port ${config.port} in ${config.env} mode`
+     `🚀 Server running at http://localhost:${config.port} in ${config.env} mode`
     );
   });
 })();
